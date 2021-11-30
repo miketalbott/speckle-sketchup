@@ -55,9 +55,13 @@ module SpeckleSystems::SpeckleConnector::ToSpeckle
 
   def group_mesh_to_speckle(component_def)
     mat_groups = {}
+    edges = []
 
-    component_def.entities.each do |face|
-      next unless face.typename == "Face"
+    component_def.entities.each do |entity|
+      edges.push(edge_to_speckle(entity)) if entity.typename == "Edge" && !entity.hidden?
+      next unless entity.typename == "Face"
+
+      face = entity
 
       # convert material
       mat_id = face.material.nil? ? "none" : face.material.entityID
@@ -74,7 +78,7 @@ module SpeckleSystems::SpeckleConnector::ToSpeckle
     end
 
     mat_groups.values.map { |group| group.delete(:pt_count) }
-    mat_groups.values
+    mat_groups.values + edges
   end
 
   def transform_to_speckle(transform)
